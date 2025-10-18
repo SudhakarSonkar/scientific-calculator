@@ -1,213 +1,375 @@
-import React, { useState } from 'react';
-import { Calculator } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-export default function ScientificCalculator() {
-  const [display, setDisplay] = useState('0');
-  const [memory, setMemory] = useState(null);
-  const [operator, setOperator] = useState(null);
-  const [newNumber, setNewNumber] = useState(true);
-  const [angleMode, setAngleMode] = useState('deg'); // deg or rad
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #111827, #1f2937);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
 
-  const handleNumber = (num) => {
-    if (newNumber) {
-      setDisplay(num);
-      setNewNumber(false);
-    } else {
-      setDisplay(display === '0' ? num : display + num);
-    }
-  };
+        .calculator {
+            background: #1f2937;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 28rem;
+        }
 
-  const handleDecimal = () => {
-    if (newNumber) {
-      setDisplay('0.');
-      setNewNumber(false);
-    } else if (!display.includes('.')) {
-      setDisplay(display + '.');
-    }
-  };
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
 
-  const handleOperator = (op) => {
-    const current = parseFloat(display);
-    
-    if (memory === null) {
-      setMemory(current);
-    } else if (operator) {
-      const result = calculate(memory, current, operator);
-      setDisplay(String(result));
-      setMemory(result);
-    }
-    
-    setOperator(op);
-    setNewNumber(true);
-  };
+        .header svg {
+            color: #60a5fa;
+            width: 24px;
+            height: 24px;
+        }
 
-  const calculate = (a, b, op) => {
-    switch (op) {
-      case '+': return a + b;
-      case '-': return a - b;
-      case '×': return a * b;
-      case '÷': return a / b;
-      case '^': return Math.pow(a, b);
-      default: return b;
-    }
-  };
+        .header h1 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: white;
+        }
 
-  const handleEquals = () => {
-    if (operator && memory !== null) {
-      const result = calculate(memory, parseFloat(display), operator);
-      setDisplay(String(result));
-      setMemory(null);
-      setOperator(null);
-      setNewNumber(true);
-    }
-  };
+        .display {
+            background: #111827;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
 
-  const handleClear = () => {
-    setDisplay('0');
-    setMemory(null);
-    setOperator(null);
-    setNewNumber(true);
-  };
+        .display-main {
+            text-align: right;
+            font-size: 2rem;
+            font-family: 'Courier New', monospace;
+            color: white;
+            word-wrap: break-word;
+        }
 
-  const handleScientific = (func) => {
-    const current = parseFloat(display);
-    let result;
+        .display-operation {
+            text-align: right;
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-top: 0.25rem;
+            min-height: 1.25rem;
+        }
 
-    switch (func) {
-      case 'sin':
-        result = angleMode === 'deg' ? Math.sin(current * Math.PI / 180) : Math.sin(current);
-        break;
-      case 'cos':
-        result = angleMode === 'deg' ? Math.cos(current * Math.PI / 180) : Math.cos(current);
-        break;
-      case 'tan':
-        result = angleMode === 'deg' ? Math.tan(current * Math.PI / 180) : Math.tan(current);
-        break;
-      case 'ln':
-        result = Math.log(current);
-        break;
-      case 'log':
-        result = Math.log10(current);
-        break;
-      case 'sqrt':
-        result = Math.sqrt(current);
-        break;
-      case 'x²':
-        result = current * current;
-        break;
-      case '1/x':
-        result = 1 / current;
-        break;
-      case 'e^x':
-        result = Math.exp(current);
-        break;
-      case '10^x':
-        result = Math.pow(10, current);
-        break;
-      case '±':
-        result = -current;
-        break;
-      case '%':
-        result = current / 100;
-        break;
-      case 'π':
-        setDisplay(String(Math.PI));
-        setNewNumber(true);
-        return;
-      case 'e':
-        setDisplay(String(Math.E));
-        setNewNumber(true);
-        return;
-      default:
-        return;
-    }
+        .mode-toggle {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
 
-    setDisplay(String(result));
-    setNewNumber(true);
-  };
+        .mode-btn {
+            flex: 1;
+            background: #2563eb;
+            color: white;
+            font-weight: 600;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
 
-  const Button = ({ children, onClick, className = '', span = false }) => (
-    <button
-      onClick={onClick}
-      className={`${span ? 'col-span-2' : ''} bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-4 rounded transition-colors ${className}`}
-    >
-      {children}
-    </button>
-  );
+        .mode-btn:hover {
+            background: #3b82f6;
+        }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
-        <div className="flex items-center gap-2 mb-4">
-          <Calculator className="text-blue-400" size={24} />
-          <h1 className="text-xl font-bold text-white">Scientific Calculator</h1>
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .buttons-main {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        button {
+            background: #374151;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #4b5563;
+        }
+
+        .btn-operator {
+            background: #ea580c;
+        }
+
+        .btn-operator:hover {
+            background: #f97316;
+        }
+
+        .btn-clear {
+            background: #dc2626;
+        }
+
+        .btn-clear:hover {
+            background: #ef4444;
+        }
+
+        .btn-equals {
+            background: #16a34a;
+            grid-column: span 2;
+        }
+
+        .btn-equals:hover {
+            background: #22c55e;
+        }
+
+        .btn-zero {
+            grid-column: span 2;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <rect x="4" y="2" width="16" height="20" rx="2"/>
+                <line x1="8" y1="6" x2="16" y2="6"/>
+                <line x1="16" y1="14" x2="16" y2="18"/>
+                <line x1="8" y1="14" x2="8" y2="18"/>
+                <line x1="12" y1="14" x2="12" y2="18"/>
+                <line x1="8" y1="10" x2="16" y2="10"/>
+            </svg>
+            <h1>Scientific Calculator</h1>
         </div>
 
-        <div className="bg-gray-900 rounded-lg p-4 mb-4">
-          <div className="text-right text-3xl font-mono text-white break-all">
-            {display}
-          </div>
-          {operator && (
-            <div className="text-right text-sm text-gray-400 mt-1">
-              {memory} {operator}
-            </div>
-          )}
+        <div class="display">
+            <div class="display-main" id="display">0</div>
+            <div class="display-operation" id="operation"></div>
         </div>
 
-        <div className="mb-3 flex gap-2">
-          <button
-            onClick={() => setAngleMode(angleMode === 'deg' ? 'rad' : 'deg')}
-            className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded transition-colors"
-          >
-            {angleMode.toUpperCase()}
-          </button>
+        <div class="mode-toggle">
+            <button class="mode-btn" id="modeBtn">DEG</button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2 mb-3">
-          <Button onClick={() => handleScientific('sin')}>sin</Button>
-          <Button onClick={() => handleScientific('cos')}>cos</Button>
-          <Button onClick={() => handleScientific('tan')}>tan</Button>
-          <Button onClick={() => handleOperator('^')} className="bg-orange-600 hover:bg-orange-500">x^y</Button>
-          
-          <Button onClick={() => handleScientific('ln')}>ln</Button>
-          <Button onClick={() => handleScientific('log')}>log</Button>
-          <Button onClick={() => handleScientific('sqrt')}>√</Button>
-          <Button onClick={() => handleScientific('x²')}>x²</Button>
-          
-          <Button onClick={() => handleScientific('e^x')}>e^x</Button>
-          <Button onClick={() => handleScientific('10^x')}>10^x</Button>
-          <Button onClick={() => handleScientific('1/x')}>1/x</Button>
-          <Button onClick={() => handleScientific('%')}>%</Button>
+        <div class="buttons">
+            <button onclick="scientific('sin')">sin</button>
+            <button onclick="scientific('cos')">cos</button>
+            <button onclick="scientific('tan')">tan</button>
+            <button class="btn-operator" onclick="setOperator('^')">x^y</button>
+            
+            <button onclick="scientific('ln')">ln</button>
+            <button onclick="scientific('log')">log</button>
+            <button onclick="scientific('sqrt')">√</button>
+            <button onclick="scientific('x²')">x²</button>
+            
+            <button onclick="scientific('e^x')">e^x</button>
+            <button onclick="scientific('10^x')">10^x</button>
+            <button onclick="scientific('1/x')">1/x</button>
+            <button onclick="scientific('%')">%</button>
         </div>
 
-        <div className="grid grid-cols-4 gap-2">
-          <Button onClick={handleClear} className="bg-red-600 hover:bg-red-500">C</Button>
-          <Button onClick={() => handleScientific('±')}>±</Button>
-          <Button onClick={() => handleScientific('π')}>π</Button>
-          <Button onClick={() => handleScientific('e')}>e</Button>
+        <div class="buttons-main">
+            <button class="btn-clear" onclick="clearAll()">C</button>
+            <button onclick="scientific('±')">±</button>
+            <button onclick="scientific('π')">π</button>
+            <button onclick="scientific('e')">e</button>
 
-          <Button onClick={() => handleNumber('7')}>7</Button>
-          <Button onClick={() => handleNumber('8')}>8</Button>
-          <Button onClick={() => handleNumber('9')}>9</Button>
-          <Button onClick={() => handleOperator('÷')} className="bg-orange-600 hover:bg-orange-500">÷</Button>
+            <button onclick="addNumber('7')">7</button>
+            <button onclick="addNumber('8')">8</button>
+            <button onclick="addNumber('9')">9</button>
+            <button class="btn-operator" onclick="setOperator('÷')">÷</button>
 
-          <Button onClick={() => handleNumber('4')}>4</Button>
-          <Button onClick={() => handleNumber('5')}>5</Button>
-          <Button onClick={() => handleNumber('6')}>6</Button>
-          <Button onClick={() => handleOperator('×')} className="bg-orange-600 hover:bg-orange-500">×</Button>
+            <button onclick="addNumber('4')">4</button>
+            <button onclick="addNumber('5')">5</button>
+            <button onclick="addNumber('6')">6</button>
+            <button class="btn-operator" onclick="setOperator('×')">×</button>
 
-          <Button onClick={() => handleNumber('1')}>1</Button>
-          <Button onClick={() => handleNumber('2')}>2</Button>
-          <Button onClick={() => handleNumber('3')}>3</Button>
-          <Button onClick={() => handleOperator('-')} className="bg-orange-600 hover:bg-orange-500">−</Button>
+            <button onclick="addNumber('1')">1</button>
+            <button onclick="addNumber('2')">2</button>
+            <button onclick="addNumber('3')">3</button>
+            <button class="btn-operator" onclick="setOperator('-')">−</button>
 
-          <Button onClick={() => handleNumber('0')} span>0</Button>
-          <Button onClick={handleDecimal}>.</Button>
-          <Button onClick={() => handleOperator('+')} className="bg-orange-600 hover:bg-orange-500">+</Button>
+            <button class="btn-zero" onclick="addNumber('0')">0</button>
+            <button onclick="addDecimal()">.</button>
+            <button class="btn-operator" onclick="setOperator('+')">+</button>
 
-          <Button onClick={handleEquals} span className="bg-green-600 hover:bg-green-500">=</Button>
+            <button class="btn-equals" onclick="calculate()">=</button>
         </div>
-      </div>
     </div>
-  );
-}
+
+    <script>
+        let display = '0';
+        let memory = null;
+        let operator = null;
+        let newNumber = true;
+        let angleMode = 'deg';
+
+        const displayEl = document.getElementById('display');
+        const operationEl = document.getElementById('operation');
+        const modeBtn = document.getElementById('modeBtn');
+
+        function updateDisplay() {
+            displayEl.textContent = display;
+            operationEl.textContent = operator && memory !== null ? `${memory} ${operator}` : '';
+        }
+
+        function addNumber(num) {
+            if (newNumber) {
+                display = num;
+                newNumber = false;
+            } else {
+                display = display === '0' ? num : display + num;
+            }
+            updateDisplay();
+        }
+
+        function addDecimal() {
+            if (newNumber) {
+                display = '0.';
+                newNumber = false;
+            } else if (!display.includes('.')) {
+                display += '.';
+            }
+            updateDisplay();
+        }
+
+        function setOperator(op) {
+            const current = parseFloat(display);
+            
+            if (memory === null) {
+                memory = current;
+            } else if (operator) {
+                const result = performCalculation(memory, current, operator);
+                display = String(result);
+                memory = result;
+            }
+            
+            operator = op;
+            newNumber = true;
+            updateDisplay();
+        }
+
+        function performCalculation(a, b, op) {
+            switch (op) {
+                case '+': return a + b;
+                case '-': return a - b;
+                case '×': return a * b;
+                case '÷': return a / b;
+                case '^': return Math.pow(a, b);
+                default: return b;
+            }
+        }
+
+        function calculate() {
+            if (operator && memory !== null) {
+                const result = performCalculation(memory, parseFloat(display), operator);
+                display = String(result);
+                memory = null;
+                operator = null;
+                newNumber = true;
+                updateDisplay();
+            }
+        }
+
+        function clearAll() {
+            display = '0';
+            memory = null;
+            operator = null;
+            newNumber = true;
+            updateDisplay();
+        }
+
+        function scientific(func) {
+            const current = parseFloat(display);
+            let result;
+
+            switch (func) {
+                case 'sin':
+                    result = angleMode === 'deg' ? Math.sin(current * Math.PI / 180) : Math.sin(current);
+                    break;
+                case 'cos':
+                    result = angleMode === 'deg' ? Math.cos(current * Math.PI / 180) : Math.cos(current);
+                    break;
+                case 'tan':
+                    result = angleMode === 'deg' ? Math.tan(current * Math.PI / 180) : Math.tan(current);
+                    break;
+                case 'ln':
+                    result = Math.log(current);
+                    break;
+                case 'log':
+                    result = Math.log10(current);
+                    break;
+                case 'sqrt':
+                    result = Math.sqrt(current);
+                    break;
+                case 'x²':
+                    result = current * current;
+                    break;
+                case '1/x':
+                    result = 1 / current;
+                    break;
+                case 'e^x':
+                    result = Math.exp(current);
+                    break;
+                case '10^x':
+                    result = Math.pow(10, current);
+                    break;
+                case '±':
+                    result = -current;
+                    break;
+                case '%':
+                    result = current / 100;
+                    break;
+                case 'π':
+                    display = String(Math.PI);
+                    newNumber = true;
+                    updateDisplay();
+                    return;
+                case 'e':
+                    display = String(Math.E);
+                    newNumber = true;
+                    updateDisplay();
+                    return;
+                default:
+                    return;
+            }
+
+            display = String(result);
+            newNumber = true;
+            updateDisplay();
+        }
+
+        modeBtn.addEventListener('click', () => {
+            angleMode = angleMode === 'deg' ? 'rad' : 'deg';
+            modeBtn.textContent = angleMode.toUpperCase();
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
